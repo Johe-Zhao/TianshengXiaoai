@@ -1,0 +1,25 @@
+{
+  "hardware": "",
+  "account": "",
+  "password": "",
+  "mi_did": "",
+  "speaker_device_id": "",
+  "speaker_name": "",
+  "box_ip": "",
+  "model": "openai:workbuddy",
+  "api_key": "local-only",
+  "api_base": "http://127.0.0.1:8008/v1",
+  "api_format": "chat",
+  "stream": true,
+  "tts": "mi",
+  "keyword": [
+    "天声小爱",
+    "天生小爱",
+    "天爱"
+  ],
+  "mute_xiaoai": true,
+  "prompt": "你是天声小爱（TianshengXiaoai），我的专属AI助手，我通过小爱音箱与你语音对话。你性格：直接、务实、简洁、带点幽默。你的回答将被语音播报，控制在80字以内，口语化，不要列表、markdown和链接。",
+  "verbose": 1,
+  "tts_options": {},
+  "transition": "正在问天声小爱，请稍等"
+}

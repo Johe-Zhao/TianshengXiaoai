@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天声小爱 — 语音助手</title>
+<link rel="icon" href="favicon.ico">
+<link rel="stylesheet" href="style.css?v=20261109b">
+</head>
+<body>
+<div class="app">
+
+  <!-- 顶栏：品牌 + 电源 -->
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo" src="logo.png" alt="天声小爱">
+      <div class="brand-text">
+        <h1>天声小爱</h1>
+        <p>天声小爱语音助手 · 小爱音箱 + 小米盒子</p>
+      </div>
+    </div>
+    <button id="power" class="power off">
+      <span class="power-dot"></span>
+      <span id="power-text">启动</span>
+    </button>
+  </header>
+
+  <!-- 状态条 -->
+  <section class="statusbar">
+    <div class="stat" id="st-codebuddy">
+      <i class="dot"></i>
+      <div class="stat-body"><span class="stat-name">AI 后端</span><em class="stat-val">未启动</em></div>
+    </div>
+    <div class="stat" id="st-gateway">
+      <i class="dot"></i>
+      <div class="stat-body"><span class="stat-name">语音网关</span><em class="stat-val">未启动</em></div>
+    </div>
+    <div class="stat" id="st-xiaogpt">
+      <i class="dot"></i>
+      <div class="stat-body"><span class="stat-name">音箱监听</span><em class="stat-val">未启动</em></div>
+    </div>
+    <div class="stat" id="st-speaker">
+      <i class="dot"></i>
+      <div class="stat-body"><span class="stat-name">小爱音箱</span><em class="stat-val">未连接</em></div>
+    </div>
+    <div class="stat" id="st-box">
+      <i class="dot"></i>
+      <div class="stat-body">
+        <span class="stat-name">小米盒子<button id="box-help" class="stat-help" type="button" title="连接盒子前必读">!</button></span>
+        <em class="stat-val">未连接</em>
+      </div>
+      </div>
+  </section>
+
+  <!-- 主体：对话 + 设置 -->
+  <main class="main">
+    <section class="chat-panel">
+      <div class="panel-head">
+        <div class="pane-tabs">
+          <button class="pane-tab active" data-pane="chat" type="button">对话记录</button>
+          <button class="pane-tab" data-pane="devices" type="button">设备看板</button>
+        </div>
+        <div class="head-actions">
+          <span class="hint" id="chat-hint">说“<b id="kw-hint">天声小爱</b>”开头即可唤醒</span>
+          <button id="refresh" class="ghost-btn">刷新</button>
+          <button id="dev-refresh" class="ghost-btn" hidden>刷新设备</button>
+        </div>
+      </div>
+
+      <div id="pane-chat" class="pane-body">
+        <div id="chat" class="chat">
+          <div class="empty">还没有对话<br><span>对音箱或盒子说“问天声小爱，你能做什么”试试</span></div>
+        </div>
+      </div>
+
+      <div id="pane-devices" class="pane-body" hidden>
+        <div class="dev-toolbar">
+          <span id="dev-updated" class="dev-updated">尚未加载</span>
+          <span class="dev-legend">点击卡片展开控制 · 开关即时生效</span>
+        </div>
+        <div id="device-grid" class="device-grid">
+          <div class="dev-loading">正在读取米家设备 …</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side-panel">
+      <div class="panel-head"><h2>设置</h2></div>
+
+      <div class="settings-list">
+        <div class="card account-card">
+          <div class="account-row">
+            <div class="account-info">
+              <label class="label">AI 后端</label>
+              <div id="agent-name" class="account-name">未登录</div>
+              <div id="agent-state" class="account-time">WorkBuddy</div>
+            </div>
+            <div class="account-actions">
+              <button id="agent-login" class="preview-btn">登录</button>
+              <button id="agent-logout" class="preview-btn" hidden>退出登录</button>
+            </div>
+          </div>
+          <p id="agent-tip" class="tip"></p>
+        </div>
+
+        <div class="card account-card">
+          <div class="account-row">
+            <div class="account-info">
+              <label class="label">小米账号</label>
+              <div id="mi-account" class="account-name">未登录</div>
+              <div id="mi-account-at" class="account-time"></div>
+            </div>
+            <div class="account-actions">
+              <button id="mi-login" class="preview-btn">登录</button>
+              <button id="mi-logout" class="preview-btn" hidden>退出登录</button>
+            </div>
+          </div>
+          <p id="mi-login-tip" class="tip"></p>
+        </div>
+
+        <div class="card">
+          <label class="label">唤醒词</label>
+          <input id="keyword" class="input" placeholder="天声小爱, 天生小爱, 天爱">
+          <p class="tip" id="kw-tip">逗号分隔可写多个。建议把常见误识别也加进来（例如“天声小爱”常被听成的同音词）</p>
+        </div>
+
+        <div class="card">
+          <label class="switch-row">
+            <span>
+              <b>免唤醒词</b>
+              <em>不用喊唤醒词，任何语音都直接交给助手</em>
+            </span>
+            <input id="no-keyword" type="checkbox" class="switch">
+          </label>
+          <p class="tip warn-tip">开启后，音箱上<b>所有对话</b>（包括“小爱同学，放首歌”这类）都会转给助手，等于接管小爱原有的问答。建议只在特定场景临时开启。</p>
+        </div>
+
+        <div class="card">
+          <label class="label">过渡语</label>
+          <input id="transition" class="input" placeholder="正在问天声小爱，请稍等">
+          <p class="tip">识别到唤醒词后先播这句，给助手争取思考时间。<b>留空则不播</b>（更快）</p>
+        </div>
+
+        <div class="card">
+          <label class="label">音色</label>
+          <div class="voice-row">
+            <select id="voice" class="input"></select>
+            <button id="preview" class="preview-btn" title="试听当前音色">试听</button>
+          </div>
+          <div class="rate-row">
+            <span class="tip">语速</span>
+            <input id="rate" class="range" type="range" min="0" max="40" step="5" value="10">
+            <span id="rate-val" class="rate-val">+10%</span>
+          </div>
+          <p id="preview-tip" class="tip"></p>
+        </div>
+
+        <div class="card">
+          <label class="label">助手人设</label>
+          <textarea id="prompt" class="input textarea" rows="4"></textarea>
+        </div>
+
+        <div class="card">
+          <label class="switch-row">
+            <span>
+              <b>打断小爱</b>
+              <em>识别到唤醒词后先掐断小爱的回答</em>
+            </span>
+            <input id="mute" type="checkbox" class="switch" checked>
+          </label>
+        </div>
+
+        <div class="card">
+          <label class="switch-row">
+            <span>
+              <b>流式播报</b>
+              <em>边生成边播报，句间略有停顿</em>
+            </span>
+            <input id="stream" type="checkbox" class="switch" checked>
+          </label>
+        </div>
+
+        <div class="card">
+          <label class="field-label">小米盒子地址</label>
+          <input id="box-ip" class="input" placeholder="留空自动扫描，如 192.168.x.x">
+          <p class="tip">盒子需开启 ADB 调试。留空时程序会自动扫描同网段 5555 端口</p>
+        </div>
+      </div>
+
+      <button id="save" class="primary-btn">保存设置</button>
+      <p id="save-tip" class="save-tip"></p>
+    </aside>
+
+  </main>
+
+  <!-- 底部日志抽屉 -->
+  <footer class="logbar" id="logbar">
+    <div class="logbar-head" id="log-toggle">
+      <span class="logbar-title"><i id="log-arrow">▸</i> 日志</span>
+      <div class="log-tabs" id="log-tabs">
+        <button class="log-tab active" data-svc="xiaogpt">音箱监听</button>
+        <button class="log-tab" data-svc="boxbridge">米盒桥接</button>
+        <button class="log-tab" data-svc="gateway">语音网关</button>
+        <button class="log-tab" data-svc="codebuddy">AI 后端</button>
+      </div>
+    </div>
+    <pre id="log" class="log" hidden>点击上方标签查看日志</pre>
+  </footer>
+
+
+</div>
+
+<!-- 盒子连接帮助弹窗（固定定位，不参与状态条布局） -->
+<div id="help-mask" class="help-mask" hidden></div>
+<div class="help-pop" id="box-help-pop" hidden>
+  <b>让程序连上盒子</b>
+  <ol>
+    <li>盒子开机（不是待机），和电脑连同一个 WiFi / 路由器</li>
+    <li>进「设置 → 关于」，连续点击「版本号」7 次，打开开发者选项</li>
+    <li>进「开发者选项」，打开「ADB 调试」</li>
+    <li>首次连接时盒子会弹窗，点「允许」并勾选「一律允许」</li>
+  </ol>
+  <p class="help-note">盒子地址会自动扫描；连不上时可在右侧设置里手动填写 IP。</p>
+  <button id="box-help-close" class="primary-btn" type="button">知道了</button>
+</div>
+
+<div id="confirm-overlay" class="modal-overlay" hidden>
+  <div class="modal-card">
+    <div id="confirm-title" class="modal-title">确认操作</div>
+    <p id="confirm-desc" class="modal-desc"></p>
+    <div class="modal-actions">
+      <button id="confirm-cancel" class="preview-btn" type="button">取消</button>
+      <button id="confirm-ok" class="preview-btn danger" type="button">确认退出</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js?v=20261109b"></script>
+</body>
+</html>
